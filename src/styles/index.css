@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap');
+@import "tailwindcss";
+
+/* ---------- Tokens ---------- */
+:root {
+  --bg: #FFFFFF;
+  --bg-alt: #F4F7F5;
+  --ink: #0A0F0D;
+  --ink-soft: #3F4A44;
+  --line: #DCE5E0;
+  --accent: #0BAA6B;
+  --accent-text: #067A4F;
+  --accent-deep: #064E3B;
+  --accent-tint: #DDF5EA;
+  --dark: #0A0F0D;
+}
+
+[data-theme="dark"] {
+  --bg: #0A0F0D;
+  --bg-alt: #111A16;
+  --ink: #F2F7F4;
+  --ink-soft: #A5B3AB;
+  --line: #22302A;
+  --accent: #2EE59D;
+  --accent-text: #2EE59D;
+  --accent-deep: #064E3B;
+  --accent-tint: #12342A;
+  --dark: #050806;
+}
+
+/* ---------- Mapping Tailwind v4 ---------- */
+/* "inline" : les classes utilisent var(--bg) directement, donc le thème dark fonctionne */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-alt: var(--bg-alt);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-tint: var(--accent-tint);
+  --color-dark: var(--dark);
+}
+
+/* Polices avec fallbacks (génère aussi --font-display, etc.) */
+@theme {
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+}
+
+/* ---------- Global ---------- */
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  height: 100dvh;
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Utilitaires ---------- */
+@layer components {
+  .label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-text);
+  }
+
+  .panel {
+    background-color: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+
+  .title-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(3rem, 9vw, 9rem);
+    line-height: 0.9;
+  }
+}
