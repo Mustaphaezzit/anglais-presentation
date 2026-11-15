@@ -1,6 +1,8 @@
-import { Monitor, Server, Database, FlaskConical } from 'lucide-react'
+import { Monitor, Server, Database, FlaskConical, Lightbulb } from 'lucide-react'
 import SlideHeader from '../components/SlideHeader'
 import InfoCard from '../components/InfoCard'
+import SectionLabel from '../components/SectionLabel'
+import WorkflowDiagram from '../components/WorkflowDiagram'
 
 const LAYERS = [
   {
@@ -33,9 +35,12 @@ const LAYERS = [
   },
 ]
 
+// Les étapes d'un projet, de l'idée au lancement
+const PROJECT_FLOW = ['IDEA', 'DESIGN', 'CODE', 'TEST', 'LAUNCH']
+
 export default function Slide03WebDevelopment() {
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-[1500px] flex-col justify-center gap-10 px-8 pb-24 pt-10 md:px-16">
+    <div className="mx-auto flex min-h-full w-full max-w-[1500px] flex-col justify-center gap-6 px-8 pb-24 pt-8 md:px-16">
       <SlideHeader
         label="03 / DEVELOPMENT WORKFLOW"
         title="AI across the stack"
@@ -48,6 +53,25 @@ export default function Slide03WebDevelopment() {
             <p className="text-lg">{text}</p>
           </InfoCard>
         ))}
+      </div>
+
+      {/* Workflow : l'IA aide du début à la fin du projet */}
+      <div className="space-y-3">
+        <SectionLabel as="p" data-anim="fade">
+          AI CAN HELP FROM THE BEGINNING TO THE END OF A PROJECT
+        </SectionLabel>
+        <WorkflowDiagram steps={PROJECT_FLOW} ariaLabel="Project phases from idea to launch" />
+      </div>
+
+      {/* Question d'accroche vers la slide suivante */}
+      <div
+        data-anim="panel"
+        className="panel flex items-center gap-4 border-l-4 border-l-accent-deep px-5 py-4"
+      >
+        <Lightbulb size={28} className="shrink-0 text-accent-text" aria-hidden="true" />
+        <p className="font-display text-xl font-bold md:text-2xl">
+          What if we could create a website just by describing our ideas?
+        </p>
       </div>
     </div>
   )

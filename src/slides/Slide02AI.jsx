@@ -1,4 +1,4 @@
-import { Code, Bug, BookOpen, FlaskConical } from 'lucide-react'
+import { Code, Bug, BookOpen, FlaskConical, Lightbulb } from 'lucide-react'
 import SlideHeader from '../components/SlideHeader'
 import InfoCard from '../components/InfoCard'
 
@@ -37,7 +37,9 @@ export default function Slide02AI() {
             </li>
           ))}
         </ol>
+        
       </div>
+
     </div>
   )
 }

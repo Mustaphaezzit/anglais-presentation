@@ -59,10 +59,92 @@ function startTyping(slideEl) {
   if (items.length) typingTweens.set(slideEl, items)
 }
 
+/* ---------- Flèches du WorkflowDiagram ---------- */
+const loopTimelines = new WeakMap()
+
+function stopLoops(slideEl) {
+  const loops = loopTimelines.get(slideEl)
+  if (loops) {
+    loops.forEach((loop) => loop.kill())
+    loopTimelines.delete(slideEl)
+  }
+  const pulses = slideEl.querySelectorAll('[data-pulse]')
+  if (pulses.length) gsap.set(pulses, { opacity: 0, x: 0, y: 0 })
+}
+
+// Lit les 3 parties d'une flèche et son sens (horizontal ou vertical selon l'écran)
+function connectorParts(connector) {
+  const line = connector.querySelector('[data-line]')
+  const head = connector.querySelector('[data-head]')
+  const pulse = connector.querySelector('[data-pulse]')
+  const horizontal = line ? line.offsetWidth >= line.offsetHeight : true
+  return { line, head, pulse, horizontal }
+}
+
+function revealConnectors(tl, slideEl, connectors, startAt) {
+  if (!connectors.length) return
+  const items = connectors.map(connectorParts)
+
+  // États de départ
+  items.forEach(({ line, head, pulse, horizontal }) => {
+    if (line) {
+      gsap.set(
+        line,
+        horizontal
+          ? { scaleX: 0, scaleY: 1, transformOrigin: '0% 50%' }
+          : { scaleX: 1, scaleY: 0, transformOrigin: '50% 0%' },
+      )
+    }
+    if (head) gsap.set(head, { opacity: 0, x: -6 })
+    if (pulse) gsap.set(pulse, { opacity: 0, x: 0, y: 0 })
+  })
+
+  // 1. Le trait se dessine, 2. la pointe apparaît avec un petit rebond
+  items.forEach(({ line, head, horizontal }, i) => {
+    const at = startAt + i * 0.1
+    if (line) {
+      tl.to(
+        line,
+        horizontal
+          ? { scaleX: 1, duration: 0.3, ease: 'power2.out' }
+          : { scaleY: 1, duration: 0.3, ease: 'power2.out' },
+        at,
+      )
+    }
+    if (head) {
+      tl.to(head, { opacity: 1, x: 0, duration: 0.2, ease: 'back.out(2)' }, at + 0.22)
+    }
+  })
+
+  // 3. Une lumière glisse le long de chaque flèche, en boucle, l'une après l'autre
+  const loops = []
+  items.forEach(({ line, pulse, horizontal }, i) => {
+    if (!line || !pulse) return
+    const prop = horizontal ? 'x' : 'y'
+    const length = horizontal ? line.offsetWidth : line.offsetHeight
+    if (!length) return
+
+    const loop = gsap.timeline({
+      repeat: -1,
+      repeatDelay: 1,
+      delay: startAt + 0.9 + i * 0.3,
+    })
+    loop
+      .set(pulse, { [prop]: 0, opacity: 0 })
+      .to(pulse, { opacity: 1, duration: 0.15 })
+      .to(pulse, { [prop]: length, duration: 0.9, ease: 'power1.inOut' }, '<')
+      .to(pulse, { opacity: 0, duration: 0.15 }, '>-0.15')
+    loops.push(loop)
+  })
+  if (loops.length) loopTimelines.set(slideEl, loops)
+}
+
 /* ---------- Entrée / sortie ---------- */
 export function animateIn(slideEl, { direction = 1 } = {}) {
   const tl = gsap.timeline()
   if (!slideEl) return tl
+
+  stopLoops(slideEl)
 
   const t = getTargets(slideEl)
   const children = [...t.title, ...t.fade, ...t.stagger, ...t.panel]
@@ -72,20 +154,21 @@ export function animateIn(slideEl, { direction = 1 } = {}) {
     stopTyping(slideEl)
     tl.set(slideEl, { visibility: 'visible', opacity: 1, y: 0 })
     if (children.length) tl.set(children, { opacity: 1, y: 0 })
-    if (t.connector.length) tl.set(t.connector, { scaleX: 1 })
+    const lines = slideEl.querySelectorAll('[data-line]')
+    const heads = slideEl.querySelectorAll('[data-head]')
+    if (lines.length) tl.set(lines, { scaleX: 1, scaleY: 1 })
+    if (heads.length) tl.set(heads, { opacity: 1, x: 0 })
     return tl
   }
 
   // État initial caché posé en JS (évite le flash)
   gsap.set(slideEl, { opacity: 0, y: OFFSET * direction })
   if (children.length) gsap.set(children, { opacity: 0, y: OFFSET })
-  if (t.connector.length) {
-    gsap.set(t.connector, { scaleX: 0, transformOrigin: '0% 50%' })
-  }
 
   tl.set(slideEl, { visibility: 'visible' })
   tl.to(slideEl, { opacity: 1, y: 0, duration: 0.2, ease: EASE })
 
+  // Le délai entre éléments est plafonné pour garder une durée totale courte
   const reveal = (els, at, stagger = 0) => {
     if (!els.length) return
     const each = els.length > 1 ? Math.min(stagger, 0.5 / (els.length - 1)) : 0
@@ -96,13 +179,7 @@ export function animateIn(slideEl, { direction = 1 } = {}) {
   reveal(t.stagger, 0.25, 0.1)
   reveal(t.panel, Math.max(0.4, tl.duration() - 0.3))
 
-  if (t.connector.length) {
-    tl.to(
-      t.connector,
-      { scaleX: 1, duration: 0.3, stagger: 0.1, ease: 'power2.out' },
-      0.45,
-    )
-  }
+  revealConnectors(tl, slideEl, t.connector, 0.45)
 
   startTyping(slideEl) // indépendant de tl : ne bloque pas la navigation
   return tl
@@ -113,6 +190,7 @@ export function animateOut(slideEl, { direction = 1 } = {}) {
   if (!slideEl) return tl
 
   stopTyping(slideEl)
+  stopLoops(slideEl)
 
   if (prefersReducedMotion()) {
     tl.set(slideEl, { opacity: 0, visibility: 'hidden' })

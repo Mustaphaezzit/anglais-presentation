@@ -14,30 +14,34 @@ import SectionLabel from '../components/SectionLabel'
 import WorkflowDiagram from '../components/WorkflowDiagram'
 import { generateApp } from '../lib/generateApp'
 
-const DEFAULT_PROMPT = `Create a car rental website.
-Users can log in, browse cars,
-and book one for their dates.`
+const DEFAULT_PROMPT =
+  'Create a car rental website called RentGo with a navbar, a hero with a search form, a grid of cars loaded from a free API with photos, category filters, Book buttons that open a booking modal, and a footer.'
 
 const EXAMPLES = [
   {
     id: 'school',
-    label: 'School site',
-    text: 'Create a website for a high school with a homepage, a list of courses, and a contact section.',
+    label: 'School portal',
+    text: 'Create a school dashboard for Lincoln High School with a sidebar (Dashboard, Students, Courses, Settings), a top bar with search, 4 KPI cards, a searchable students table with real profile photos from a free API, and a footer.',
   },
   {
     id: 'restaurant',
     label: 'Restaurant',
-    text: 'Create a menu website for an Italian restaurant with starters, mains and desserts, with prices.',
+    text: 'Create a website for an Italian restaurant called Trattoria Bella with a navbar, a photo hero, a menu with category tabs and dish photos from a free API, a reservation modal with a form, and a footer.',
   },
   {
-    id: 'portfolio',
-    label: 'Portfolio',
-    text: 'Create a personal portfolio page for a photographer with a gallery grid and a contact form.',
+    id: 'store',
+    label: 'Online store',
+    text: 'Create a sneaker store with a navbar and a cart counter, a product grid with photos loaded from a free API and Add to cart buttons, a cart drawer with a live total, and a footer.',
   },
   {
-    id: 'todo',
-    label: 'To-do app',
-    text: 'Create a simple to-do app where I can add tasks, tick them off and delete them.',
+    id: 'dashboard',
+    label: 'Dashboard',
+    text: 'Create a SaaS analytics dashboard with a sidebar, a top bar, 4 KPI cards, a revenue chart, a recent orders table with customer avatars and status badges, and a footer.',
+  },
+  {
+    id: 'tasks',
+    label: 'Task app',
+    text: 'Create a task manager app with a sidebar (All, Today, Completed), tasks loaded from a free API, an add-task form, complete and delete actions, a progress bar, and a footer.',
   },
 ]
 
@@ -86,6 +90,7 @@ export default function Slide04VibeCoding() {
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT)
   const [state, setState] = useState({ status: 'idle', html: '', provider: '', failed: [] })
   const [isFull, setIsFull] = useState(false)
+  const [elapsed, setElapsed] = useState(0)
   const resultRef = useRef(null)
 
   const loading = state.status === 'loading'
@@ -97,6 +102,17 @@ export default function Slide04VibeCoding() {
     document.addEventListener('fullscreenchange', sync)
     return () => document.removeEventListener('fullscreenchange', sync)
   }, [])
+
+  // Compteur de secondes pendant la génération
+  useEffect(() => {
+    if (!loading) return undefined
+    const start = Date.now()
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000)
+    return () => {
+      clearInterval(id)
+      setElapsed(0)
+    }
+  }, [loading])
 
   const toggleFull = () => {
     const el = resultRef.current
@@ -130,7 +146,7 @@ export default function Slide04VibeCoding() {
   const badge = {
     idle: 'EXAMPLE',
     loading: 'GENERATING…',
-    done: ``,
+    done: 'LIVE',
     fallback: 'BACKUP PREVIEW',
     error: 'ERROR',
   }[state.status]
@@ -149,19 +165,20 @@ export default function Slide04VibeCoding() {
       <SlideHeader
         label="04 / THE NEW APPROACH"
         title="What is vibe coding?"
-        intro="Describe any website in plain English. AI builds it."
+        intro="Describe any website in natural language. AI builds it."
       />
 
       <div className="grid items-start gap-5 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
         {/* 1. Prompt */}
         <div data-anim="fade">
           <SectionLabel as="p" className="mb-2">
-            1 · YOU TYPE A PROMPT
+            1 · YOU DESCRIBE IT IN NATURAL LANGUAGE
           </SectionLabel>
 
           <div className={`panel flex flex-col overflow-hidden ${PANEL_H}`}>
             <textarea
-              aria-label="Prompt for the AI"
+              aria-label="Describe the website in natural language"
+              placeholder="Explain any website in your own words, like you would to a person…"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
@@ -170,7 +187,7 @@ export default function Slide04VibeCoding() {
                   generate()
                 }
               }}
-              maxLength={500}
+              maxLength={600}
               className="min-h-0 flex-1 resize-none bg-bg p-4 font-mono text-sm leading-[1.6] text-ink"
             />
 
@@ -181,7 +198,7 @@ export default function Slide04VibeCoding() {
                   type="button"
                   onClick={() => setPrompt(text)}
                   disabled={loading}
-                  className="min-h-11 rounded-full border border-line bg-bg px-4 font-mono text-xs uppercase tracking-[0.08em] text-ink hover:bg-bg-alt disabled:opacity-60"
+                  className="min-h-9 rounded-full border border-line bg-bg px-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink hover:bg-bg-alt disabled:opacity-60"
                 >
                   {label}
                 </button>
@@ -221,7 +238,7 @@ export default function Slide04VibeCoding() {
         {/* 2. Résultat */}
         <div>
           <SectionLabel as="p" className="mb-2" data-anim="fade">
-            2 · AI GENERATES THE APP
+            2 · AI BUILDS THE WEBSITE
           </SectionLabel>
 
           <div
@@ -277,7 +294,7 @@ export default function Slide04VibeCoding() {
               {state.status === 'loading' && (
                 <div className="absolute inset-0 flex items-center justify-center gap-3 text-ink-soft">
                   <Loader size={20} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
-                  <span className="font-mono text-sm">AI is writing the site…</span>
+                  <span className="font-mono text-sm">AI is writing the site… {elapsed}s</span>
                 </div>
               )}
 
