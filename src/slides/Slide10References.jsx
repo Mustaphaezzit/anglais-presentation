@@ -15,17 +15,10 @@ export default function Slide10Conclusion() {
 
       <WorkflowDiagram steps={FLOW} ariaLabel="What technical knowledge allows" />
 
-      <div className="panel border-accent bg-accent-tint p-6" data-anim="panel">
-        <SectionLabel as="p" className="mb-2">
-          DISCUSSION
-        </SectionLabel>
-        <p className="font-display text-[clamp(1.5rem,2.6vw,2.5rem)] font-extrabold uppercase leading-tight">
-          If AI can build an app, can everyone become a software engineer?
-        </p>
-      </div>
+
 
       <p className="font-mono text-xs uppercase tracking-[0.08em] text-ink-soft" data-anim="fade">
-        Thank you — questions?
+        Thank you 
       </p>
     </div>
   )
